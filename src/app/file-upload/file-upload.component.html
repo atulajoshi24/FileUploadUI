@@ -1,0 +1,28 @@
+
+<mat-card>
+		<mat-card-title>
+			File Upload Utility 
+		</mat-card-title>
+		<mat-card-content>				 	
+			<div *ngIf="!fileUploadResponse.success">
+				{{fileUploadResponse.message}} 
+				<mat-list *ngIf="!fileUploadResponse.success">
+					<mat-list-item *ngFor="let error of fileUploadResponse.errors">
+						{{error.message}}
+					</mat-list-item>
+				</mat-list>
+			</div>
+			<div *ngIf="fileUploadResponse.success">
+				{{fileUploadResponse.message}}
+			</div>
+		</mat-card-content>
+		<mat-card-actions>  			
+			<button mat-button color="primary" (click)="openFileDialog()">  
+				Upload File
+			</button>  
+		</mat-card-actions> 
+		<mat-card-actions>  			
+			<mat-progress-bar [value]="fileUploadProgress"></mat-progress-bar>
+		</mat-card-actions>   
+</mat-card>
+<input type="file" #fileInput id="fileUpload" name="fileUpload" accept=".csv" style="display:none;" />
