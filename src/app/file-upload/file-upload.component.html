@@ -15,14 +15,32 @@
 			<div *ngIf="fileUploadResponse.success">
 				{{fileUploadResponse.message}}
 			</div>
+
+			<br/>
+
+			<div *ngIf="dataSource.data.length > 0">
+				<table mat-table [dataSource]="dataSource" class="mat-elevation-z8 center-align">
+
+					<ng-container matColumnDef="FileName">
+					<th mat-header-cell *matHeaderCellDef>Uploaded File Name</th>
+					<td mat-cell *matCellDef="let element">{{element.data.name}}</td>
+					</ng-container>
+
+					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+					<tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+				</table>
+			</div>
+
 		</mat-card-content>
+	
 		<mat-card-actions>  			
-			<button mat-button color="primary" (click)="openFileDialog()">  
+			<button mat-raised-button color="primary" (click)="openFileDialog()">  
 				Upload File
 			</button>  
 		</mat-card-actions> 
 		<mat-card-actions>  			
-			<mat-progress-bar [value]="fileUploadProgress"></mat-progress-bar>
+			<mat-progress-bar color="warn" [value]="fileUploadProgress"></mat-progress-bar>
 		</mat-card-actions>   
 </mat-card>
+
 <input type="file" #fileInput id="fileUpload" name="fileUpload" accept=".csv" style="display:none;" />

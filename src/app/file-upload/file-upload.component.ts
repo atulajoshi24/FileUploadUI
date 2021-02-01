@@ -5,6 +5,7 @@ import { FileUploadResponse, FileUploadError } from './file-upload-response';
 import { map, catchError } from 'rxjs/operators';
 import { HttpEventType, HttpErrorResponse } from '@angular/common/http';
 import { EMPTY } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
 
 
 @Component({
@@ -16,12 +17,15 @@ export class FileUploadComponent implements OnInit {
 
   @ViewChild("fileInput", { static: true })
   fileInput!: ElementRef;
-  
+
+  displayedColumns: string[] = ['FileName'];
   fileUploadResponse:FileUploadResponse;
   successMessage:string = 'File Uploaded Successfully';
   failureMessage:string = 'Failure In File Upload';
   allowedFileTypes = ['csv'];
-  fileUploadProgress = 0;
+  fileUploadProgress:number;
+  uploadedFiles:FileUploadDetails[];
+  dataSource : MatTableDataSource<FileUploadDetails>;
 
   constructor(private fileUploadService:FileUploadService) {   
      this.fileUploadResponse = {
@@ -29,9 +33,13 @@ export class FileUploadComponent implements OnInit {
       'message':'',
       'errors':[],
     };
+    this.uploadedFiles = [];
+    this.fileUploadProgress = 0;
+    this.dataSource = new MatTableDataSource<FileUploadDetails>();
   }
 
-  initFileUploadDetails(){
+
+  initFileUploadResponseDetails(){
     this.fileUploadProgress = 0;
     this.fileUploadResponse = {
       'success':true,
@@ -41,18 +49,31 @@ export class FileUploadComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.initFileUploadDetails();
+    this.fileUploadProgress = 0;
+    this.fileUploadResponse = {
+      'success':true,
+      'message':'',
+      'errors':[],
+    };
+    this.uploadedFiles = [];
+    this.dataSource = new MatTableDataSource<FileUploadDetails>();
   }
 
   openFileDialog() {  
 
-    this.initFileUploadDetails();
+    this.initFileUploadResponseDetails();
     const fileInput = this.fileInput.nativeElement;
     fileInput.onchange = () => {         
         const file = fileInput.files[0]; 
         const valid = this.validateFile(file);
         if(valid){
-          this.uploadFile({ data: file, inProgress: false, progress: 0});  
+          const fileToUpload:FileUploadDetails= {
+            "data": file, 
+            "inProgress": false, 
+            "progress": 0
+          };
+          //this.uploadFile({ data: file, inProgress: false, progress: 0});  
+          this.uploadFile(fileToUpload);  
         }else{
           this.fileUploadResponse = {
             'success':false,
@@ -93,7 +114,8 @@ export class FileUploadComponent implements OnInit {
            'success':false,
            'message':this.failureMessage + ' '+file.data.name,
            'errors': this.getFileUploadErrors(error)
-        };             
+        };  
+        this.fileInput.nativeElement.value = '';           
         return EMPTY;       
       }))
       .subscribe((event: any) => {  
@@ -107,6 +129,9 @@ export class FileUploadComponent implements OnInit {
               'message': file.data.name + ' ' +this.successMessage,
               'errors':[]
             };
+            this.uploadedFiles.push(file);
+            this.dataSource = new MatTableDataSource<FileUploadDetails>(this.uploadedFiles);          
+            this.fileInput.nativeElement.value = '';
           }  
         }  
       }); 
